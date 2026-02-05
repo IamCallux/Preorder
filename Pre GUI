@@ -1,0 +1,21 @@
+PreOrder = Window(MainMenu, title="Pre‑Order", height=500, width=650, bg="dark green")
+PreOrder.hide()
+
+Text(PreOrder, text="Pre‑Order Menu", size=18, color="white")
+exit_button = PushButton(PreOrder, text="Exit", align="bottom", command=close_pre)
+
+product_data = query_database(database_file, "SELECT ProductID, product_name, product_price FROM Products")
+
+selected_items = []
+
+product_dropdown = Combo(PreOrder,options=[f"{row[1]} - £{row[2]}" for row in product_data],width=30)
+button_box = Box(PreOrder, layout="grid")
+
+PushButton(button_box, text="Add Item", grid=[0,0], command=add_item)
+PushButton(button_box, text="Remove Last Item", grid=[1,0], command=remove_item)
+PushButton(button_box, text="Confirm Order", grid=[2,0], command=confirm_order)
+
+Text(PreOrder, text="Selected Items:", size=14, color="white")
+order_list = Text(PreOrder, text="(No items selected)", size=12, color="white")
+
+total_text = Text(PreOrder, text="Total: £0", size=14, color="white")
