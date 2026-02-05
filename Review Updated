@@ -1,0 +1,50 @@
+def Review_choice():
+    global Rstar
+
+    selected_product = Product_Combo.value
+
+    if selected_product == "":
+        info("Error", "Please select a product to review")
+        return
+
+
+    if Rstar == 0:
+        info("Error", "Please select a star rating")
+        return
+
+    product_id = product_ids[selected_product]
+
+    query = """
+        INSERT INTO Review (Review_stars, Review_date, ProductID)
+        VALUES (?, DATE('now'), ?)
+    """
+    execute_sql(database_file, query, (Rstar, product_id))
+
+    info("Success", f"Your review for {selected_product} has been submitted. Thank you!")
+
+def show_star_chart():
+    query = """
+        SELECT Products.product_name, AVG(Review.Review_stars)
+        FROM Review
+        JOIN Products ON Review.ProductID = Products.ProductID
+        GROUP BY Products.product_name
+    """
+    data = query_database(database_file, query)
+
+    if not data:
+        info("No Data", "No reviews have been submitted yet.")
+        return
+
+    product_names = [row[0] for row in data]
+    avg_stars = [row[1] for row in data]
+
+   
+    plt.figure(figsize=(15,6))
+    plt.bar(product_names, avg_stars, color="gold")
+    plt.ylim(0, 5)
+    plt.title("Average Star Ratings per Product")
+    plt.xlabel("Product")
+    plt.ylabel("Average Stars")
+    plt.grid(axis="y", linestyle="--", alpha=0.5)
+
+    plt.show()
