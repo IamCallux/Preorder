@@ -1,0 +1,53 @@
+def add_item():
+    item = product_dropdown.value
+    if item == "":
+        info("Error", "Please select a product")
+        return
+
+    selected_items.append(item)
+    update_order_list()
+    update_total()
+
+def remove_item():
+    if not selected_items:
+        info("Error", "No items to remove")
+        return
+
+    selected_items.pop()
+    update_order_list()
+    update_total()
+
+def update_order_list():
+    order_list.value = "\n".join(selected_items) if selected_items else "(No items selected)"
+
+def update_total():
+    total = 0
+    for item in selected_items:
+        name = item.split(" - £")[0]
+        price = int(item.split(" - £")[1])
+        total += price
+    total_text.value = f"Total: £{total}"
+
+def confirm_order():
+    if not selected_items:
+        info("Error", "You must select at least one item")
+        return
+
+    description = ", ".join(selected_items)
+    total = 0
+    for item in selected_items:
+        price = int(item.split(" - £")[1])
+        total += price
+    sql = """
+        INSERT INTO Orders (Order_date, Order_type, Order_collected, 
+                            Order_timecollected, Order_total, Order_paid, 
+                            Order_description, Order_status, UserID)
+        VALUES (DATE('now'), 'Pre-Order', 0, NULL, ?, 0, ?, 'Pending', 1)
+    """
+
+    execute_sql(database_file, sql, (total, description))
+
+    info("Success", "Your pre‑order has been placed!")
+    selected_items.clear()
+    update_order_list()
+    update_total()
