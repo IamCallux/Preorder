@@ -1,0 +1,32 @@
+Review = Window(MainMenu, title="Review", height=400, width=600, bg="dark green")
+Review.hide()
+
+Review_closing = Box(Review, width="fill", align="top")
+Review_closed = PushButton(Review_closing, text="Exit", align="left", command=close_review)
+
+Title = Text(Review, text="Review Page", align="top", size=16)
+
+Text(Review, text="Select a product to review:")
+Product_Combo = Combo(Review, options=product_names)
+
+
+Review_box = Box(Review, layout="grid")
+
+# Stars
+Rstar1 = Text(Review_box, text="⭐", grid=[0,6], size=40)
+Rstar2 = Text(Review_box, text="⭐", grid=[1,6], size=40)
+Rstar3 = Text(Review_box, text="⭐", grid=[2,6], size=40)
+Rstar4 = Text(Review_box, text="⭐", grid=[3,6], size=40)
+Rstar5 = Text(Review_box, text="⭐", grid=[4,6], size=40)
+
+Rstar1.when_clicked = star1
+Rstar2.when_clicked = star2
+Rstar3.when_clicked = star3
+Rstar4.when_clicked = star4
+Rstar5.when_clicked = star5
+
+Review_button_box = Box(Review, width="fill", align="bottom", height=100)
+
+Review_button = PushButton(Review_button_box, text="Submit Review", command=Review_choice)
+
+View_Chart_Button = PushButton(Review_button_box, text="View Star Ratings", command=show_star_chart)
