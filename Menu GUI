@@ -1,0 +1,14 @@
+MainMenu = App(title="Main Menu", height=400, width=500, bg="dark green")
+
+Text(MainMenu, text="Welcome to the Café System", size=18, color="white", align="top")
+
+menu_box = Box(MainMenu, layout="grid", align="top")
+
+review_button = PushButton(menu_box, text="Write a Review", grid=[0,0], width=20, command=open_review)
+preorder_button = PushButton(menu_box, text="Pre‑Order", grid=[0,1], width=20, command=open_pre)
+employee_btn = PushButton(menu_box, text="Employee", grid=[0,2], width=20,command=open_employee_login)
+
+
+
+
+exit_button = PushButton(MainMenu, text="Exit Program", align="bottom", command=MainMenu.destroy)
