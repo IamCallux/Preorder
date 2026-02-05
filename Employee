@@ -1,0 +1,90 @@
+def open_employee_login():
+    login = Window(MainMenu, title="Employee Login", width=300, height=200)
+
+    Text(login, text="Username:")
+    username = TextBox(login)
+
+    Text(login, text="Password:")
+    password = TextBox(login, hide_text=True)
+
+    def attempt_login():
+        user = username.value
+        pw = password.value
+
+        # Replace with your real staff login logic
+        if user == "admin" and pw == "123":
+            login.hide()
+            dash.show()
+        else:
+            info("Error", "Invalid login")
+
+    PushButton(login, text="Login", command=attempt_login)
+
+def view_reviews():
+    win = Window(MainMenu, title="All Reviews", width=500, height=400)
+
+    Text(win, text="Customer Reviews", size=14)
+
+    conn = sqlite3.connect("myDB.db")
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT Products.product_name, Review.Review_stars, Review.Review_date
+        FROM Review
+        JOIN Products ON Review.ProductID = Products.ProductID
+    """)
+
+    rows = c.fetchall()
+    conn.close()
+
+    for row in rows:
+        product, stars, date = row
+        Text(win, text=f"Product: {product} | Stars: {stars} | Date: {date}")
+
+
+def view_preorders():
+    win = Window(MainMenu, title="All Preorders", width=1800, height=800)
+
+    Text(win, text="Preorders", size=14)
+
+    conn = sqlite3.connect("myDB.db")
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT OrderID, Order_date, Order_description, Order_total, Order_status
+        FROM Orders
+        WHERE Order_type = 'Pre-Order'
+    """)
+
+    rows = c.fetchall()
+    conn.close()
+
+    for row in rows:
+        order_id, date, desc, total, status = row
+
+        box = Box(win, layout="grid")
+
+        Text(box, text=f"ID: {order_id}", grid=[0,0])
+        Text(box, text=f"Date: {date}", grid=[1,0])
+        Text(box, text=f"Items: {desc}", grid=[2,0])
+        Text(box, text=f"Total: £{total}", grid=[3,0])
+        Text(box, text=f"Status: {status}", grid=[4,0])
+
+        # Only show button if not already completed
+        if status != "Completed":
+            PushButton(
+                box,
+                text="Mark Completed",
+                grid=[5,0],
+                command=lambda oid=order_id, w=win: mark_order_complete(oid, w)
+            )
+
+def mark_order_complete(order_id, window):
+    execute_sql(
+        "myDB.db",
+        "UPDATE Orders SET Order_status = 'Completed', Order_collected = 1, Order_timecollected = DATE('now') WHERE OrderID = ?",
+        (order_id,)
+    )
+    info("Success", f"Order {order_id} marked as completed.")
+    window.destroy()
+    view_preorders()  # Refresh the list
