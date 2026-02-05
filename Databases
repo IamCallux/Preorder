@@ -1,0 +1,121 @@
+sql_tables_and_inserts = """
+CREATE TABLE User (
+    UserID INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserFirstName TEXT,
+    UserLastName TEXT,
+    User_dob DATE,
+    User_name BOOL,
+    User_email BOOL,
+    UserPassword TEXT
+);
+
+CREATE TABLE Products (
+    ProductID INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_name TEXT,
+    product_price INT,
+    product_allgains TEXT,
+    product_date DATE
+);
+
+CREATE TABLE Review (
+    ReviewID INTEGER PRIMARY KEY AUTOINCREMENT,
+    Review_stars INT,
+    Review_date DATE,
+    ProductID INT,
+    FOREIGN KEY(ProductID) REFERENCES Products(ProductID)
+);
+
+CREATE TABLE Orders (
+    OrderID INTEGER PRIMARY KEY AUTOINCREMENT,
+    Order_date DATE,
+    Order_type TEXT,
+    Order_collected BOOL,
+    Order_timecollected DATE,
+    Order_total INT,
+    Order_paid INT,
+    Order_description TEXT,
+    Order_status TEXT,
+    UserID INT,
+    FOREIGN KEY(UserID) REFERENCES User(UserID)
+);
+
+-- Sample inserts
+INSERT INTO Products (product_name, product_price, product_allgains, product_date) VALUES
+('Espresso', 3, 'None', '2026-01-01'),
+('Chcoclate Cookie', 5, 'Gluten', '2026-01-01'),
+('Black Coffee', 2, 'None', '2026-01-01'),
+('Carrot Cake', 5, 'None', '2026-01-01'),
+('Panachocla', 4, 'None', '2026-01-01'),
+('Latte', 4, 'Milk', '2026-01-02');
+
+INSERT INTO Review (Review_stars, Review_date, ProductID) VALUES
+(3, '2026-01-10', 1),
+(5, '2026-01-10', 2),
+(2, '2026-01-10', 3),
+(1, '2026-01-10', 4),
+(4, '2026-01-10', 5),
+(4, '2026-01-11', 6);
+
+INSERT INTO Orders (Order_date, Order_type, Order_collected, Order_timecollected, Order_total, Order_paid, Order_description, Order_status, UserID) VALUES
+('2026-01-15', 'Takeaway', 1, '2026-01-15', 7, 1, 'Espresso and Latte', 'Completed', 1),
+('2026-01-16', 'Dine-in', 0, NULL, 4, 0, 'Latte only', 'Pending', 2);
+"""
+
+
+# Connect to DB and create tables + inserts
+conn = sqlite3.connect(database_file)
+cursor = conn.cursor()
+cursor.executescript(sql_tables_and_inserts)
+conn.commit()
+
+# Hash passwords
+hashed_pw1 = hashlib.sha256("123".encode('utf-8')).hexdigest()
+hashed_pw2 = hashlib.sha256("1".encode('utf-8')).hexdigest()
+hashed_pw3 = hashlib.sha256("88".encode('utf-8')).hexdigest()
+hashed_pw4 = hashlib.sha256("6".encode('utf-8')).hexdigest()
+
+# Insert users with hashed passwords
+cursor.execute(
+    "INSERT INTO User (UserFirstName, UserLastName, User_dob, User_name, User_email, UserPassword) VALUES (?, ?, ?, ?, ?, ?)",
+    ('Callum', 'Bond', '2000-11-04', 1, 1, hashed_pw1)
+)
+cursor.execute(
+    "INSERT INTO User (UserFirstName, UserLastName, User_dob, User_name, User_email, UserPassword) VALUES (?, ?, ?, ?, ?, ?)",
+    ('Jeff', 'Gong', '2006-11-04', 1, 1, hashed_pw2)
+)
+cursor.execute(
+    "INSERT INTO User (UserFirstName, UserLastName, User_dob, User_name, User_email, UserPassword) VALUES (?, ?, ?, ?, ?, ?)",
+    ('Johnathan', 'Balthford', '2004-07-07', 1, 1, hashed_pw3)
+)
+cursor.execute(
+    "INSERT INTO User (UserFirstName, UserLastName, User_dob, User_name, User_email, UserPassword) VALUES (?, ?, ?, ?, ?, ?)",
+    ('Eric', 'Agrel', '2000-11-04', 1, 1, hashed_pw4)
+)
+
+conn.commit()
+conn.close()
+
+
+def query_database(database, query, params=()):
+    #The def function used when needing to accsess a database
+    # Function to query the database with optional parameters
+    with sqlite3.connect(database) as conn:
+        cur = conn.cursor()
+        cur.execute(query, params)
+        rows = cur.fetchall()
+    return rows
+#
+#
+def execute_sql(database, sql_statement, params=()):
+    # Function to execute SQL statements (insert, update, delete)
+    with sqlite3.connect(database) as conn:
+        cur = conn.cursor()
+        cur.execute(sql_statement, params)
+        conn.commit()# Commit changes, database initialized
+        # Return last inserted row id
+    return cur.lastrowid 
+# Load products for ComboBox
+product_list = query_database(database_file, "SELECT ProductID, product_name FROM Products")
+product_names = [row[1] for row in product_list]  # Only names for display
+product_ids = {row[1]: row[0] for row in product_list}  # Map name → ID
+Rstar = 0
